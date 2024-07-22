@@ -78,7 +78,7 @@ def process_accounts(accounts, initial_run=True):
         }
 
         account_name = get_account_name(tele_id)
-        print(f"\nMemproses akun {index + 1}/{num_accounts}: TeleID={tele_id}")
+        print(f"\nMemproses akun {index + 1}/{num_accounts}: Nama={account_name}, TeleID={tele_id}, Wallet={wallet}")
         
         # Menyelesaikan tugas X jika diminta (hanya pada awal eksekusi)
         if initial_run and complete_task_x:
@@ -97,7 +97,8 @@ def process_accounts(accounts, initial_run=True):
                     print(f"Tugas {task['taskId']} selesai.")
                 else:
                     print(f"Gagal menyelesaikan tugas {task['taskId']}.")
-            
+                time.sleep(3)  # Jeda 3 detik antara tugas
+
             # Mengambil hadiah tugas X
             quest_rewards = [1, 2, 4, 3, 13, 14]
             for quest_id in quest_rewards:
@@ -106,6 +107,7 @@ def process_accounts(accounts, initial_run=True):
                     print(f"Berhasil mengambil hadiah quest {quest_id}.")
                 else:
                     print(f"Gagal mengambil hadiah quest {quest_id}.")
+                time.sleep(3)  # Jeda 3 detik antara pengambilan hadiah
 
         # Menanyakan apakah sudah mengundang teman (hanya pada awal eksekusi)
         if initial_run and not complete_task_x:
