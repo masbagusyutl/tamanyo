@@ -117,17 +117,17 @@ def process_accounts(accounts, initial_run=True, invite_option=""):
                 if invite_friend:
                     success = make_post_request("https://api.taman.fun/return-quest", {"questId": 10}, headers)
                     if success:
-                        print(f"Berhasil mengambil hadiah undangan teman untuk akun {account_name}.")
+                        print(f"Berhasil mengambil hadiah undangan teman untuk {account_name}.")
                     else:
-                        print(f"Gagal mengambil hadiah undangan teman untuk akun {account_name}. Kemungkinan belum mengundang teman.")
+                        print(f"Gagal mengambil hadiah undangan teman untuk {account_name}. Kemungkinan belum mengundang teman.")
             elif invite_option == "2":
                 success = make_post_request("https://api.taman.fun/return-quest", {"questId": 10}, headers)
                 if success:
-                    print(f"Berhasil mengambil hadiah undangan teman untuk akun {account_name}.")
+                    print(f"Berhasil mengambil hadiah undangan teman untuk {account_name}.")
                 else:
-                    print(f"Gagal mengambil hadiah undangan teman untuk akun {account_name}. Kemungkinan belum mengundang teman.")
+                    print(f"Gagal mengambil hadiah undangan teman untuk {account_name}. Kemungkinan belum mengundang teman.")
             elif invite_option == "3":
-                print(f"Melewati pengambilan hadiah undangan teman untuk akun {account_name}.")
+                print(f"Melewati pengambilan hadiah undangan teman untuk {account_name}.")
         
         # Menjalankan tugas claim 1 jam sekali
         success = make_post_request("https://api.taman.fun/mining", {}, headers)
