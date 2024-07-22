@@ -42,16 +42,17 @@ def get_account_name(tele_id):
     return f"Akun {tele_id}"
 
 # Fungsi utama untuk memproses semua akun
-def process_accounts(accounts, initial_run=True):
+def process_accounts(accounts, initial_run=True, invite_option=""):
     num_accounts = len(accounts)
 
     if initial_run:
         # Menanyakan apakah ingin menyelesaikan tugas X
         complete_task_x = input("Apakah ingin menyelesaikan tugas X? (y/n): ").strip().lower() == 'y'
-        invite_friend = False
+
+        # Menanyakan opsi undangan teman
+        invite_option = input("Pilih opsi undangan teman: (1) Tanyakan satu per satu (2) Anggap sudah semua (3) Anggap belum semua: ").strip()
     else:
         complete_task_x = False
-        invite_friend = False
 
     # Memproses setiap akun
     for index, (tele_id, wallet) in enumerate(accounts):
@@ -78,7 +79,7 @@ def process_accounts(accounts, initial_run=True):
         }
 
         account_name = get_account_name(tele_id)
-        print(f"\nMemproses akun {index + 1}/{num_accounts}: Akun={tele_id}")
+        print(f"\nMemproses akun {index + 1}/{num_accounts}: Nama={account_name}, TeleID={tele_id}, Wallet={wallet}")
         
         # Menyelesaikan tugas X jika diminta (hanya pada awal eksekusi)
         if initial_run and complete_task_x:
@@ -109,15 +110,24 @@ def process_accounts(accounts, initial_run=True):
                     print(f"Gagal mengambil hadiah quest {quest_id}.")
                 time.sleep(3)  # Jeda 3 detik antara pengambilan hadiah
 
-        # Menanyakan apakah sudah mengundang teman (hanya pada awal eksekusi)
+        # Menanyakan atau mengambil hadiah undangan teman sesuai opsi
         if initial_run and not complete_task_x:
-            invite_friend = input("Apakah sudah mengundang 1 teman? (y/n): ").strip().lower() == 'y'
-            if invite_friend:
+            if invite_option == "1":
+                invite_friend = input(f"Apakah akun {account_name} sudah mengundang 1 teman? (y/n): ").strip().lower() == 'y'
+                if invite_friend:
+                    success = make_post_request("https://api.taman.fun/return-quest", {"questId": 10}, headers)
+                    if success:
+                        print(f"Berhasil mengambil hadiah undangan teman untuk akun {account_name}.")
+                    else:
+                        print(f"Gagal mengambil hadiah undangan teman untuk akun {account_name}. Kemungkinan belum mengundang teman.")
+            elif invite_option == "2":
                 success = make_post_request("https://api.taman.fun/return-quest", {"questId": 10}, headers)
                 if success:
-                    print("Berhasil mengambil hadiah undangan teman.")
+                    print(f"Berhasil mengambil hadiah undangan teman untuk akun {account_name}.")
                 else:
-                    print("Gagal mengambil hadiah undangan teman. Kemungkinan belum mengundang teman.")
+                    print(f"Gagal mengambil hadiah undangan teman untuk akun {account_name}. Kemungkinan belum mengundang teman.")
+            elif invite_option == "3":
+                print(f"Melewati pengambilan hadiah undangan teman untuk akun {account_name}.")
         
         # Menjalankan tugas claim 1 jam sekali
         success = make_post_request("https://api.taman.fun/mining", {}, headers)
@@ -136,7 +146,7 @@ def process_accounts(accounts, initial_run=True):
     countdown_timer(3600)
 
     # Memulai ulang kode
-    process_accounts(accounts, initial_run=False)
+    process_accounts(accounts, initial_run=False, invite_option=invite_option)
 
 # Membaca data dari data.txt
 accounts = read_data('data.txt')
