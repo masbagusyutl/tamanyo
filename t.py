@@ -82,7 +82,7 @@ def process_accounts(accounts, initial_run=True, invite_option_1="", invite_opti
         }
 
         account_name = get_account_name(tele_id)
-        print(f"\nMemproses akun {index + 1}/{num_accounts}: Nama={account_name}, TeleID={tele_id}, Wallet={wallet}")
+        print(f"\nMemproses akun {index + 1}/{num_accounts}: TeleID={tele_id}")
         
         # Menyelesaikan tugas X jika diminta (hanya pada awal eksekusi)
         if initial_run and complete_task_x:
