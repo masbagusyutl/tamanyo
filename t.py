@@ -23,7 +23,11 @@ def get_random_user_agent():
 def make_post_request(url, payload, headers):
     try:
         response = requests.post(url, json=payload, headers=headers)
-        return response.status_code == 200
+        if response.status_code == 200:
+            return True
+        else:
+            print(f"Status code error: {response.status_code}")
+            return False
     except requests.exceptions.RequestException as e:
         print(f"Error: {e}")
         return False
@@ -41,50 +45,46 @@ def countdown_timer(seconds):
 def get_account_name(tele_id):
     return f"Akun {tele_id}"
 
+# Fungsi untuk login ke akun
+def login_to_account(headers):
+    login_url = "https://api.taman.fun/users"
+    success = make_post_request(login_url, {}, headers)
+    if success:
+        print(f"Berhasil login.")
+    else:
+        print(f"Gagal login.")
+    return success
+
 # Fungsi utama untuk memproses semua akun
 def process_accounts(accounts, initial_run=True, invite_option_1="", invite_option_10=""):
     num_accounts = len(accounts)
 
     if initial_run:
-        # Menanyakan apakah ingin menyelesaikan tugas X
         complete_task_x = input("Apakah ingin menyelesaikan tugas X? (y/n): ").strip().lower() == 'y'
-
-        # Menanyakan opsi undangan teman 1
         invite_option_1 = input("Pilih opsi undangan teman 1: (1) Tanyakan satu per satu (2) Anggap sudah semua (3) Anggap belum semua: ").strip()
-
-        # Menanyakan opsi undangan teman 10
         invite_option_10 = input("Pilih opsi undangan teman 10: (1) Tanyakan satu per satu (2) Anggap sudah semua (3) Anggap belum semua: ").strip()
     else:
         complete_task_x = False
 
-    # Memproses setiap akun
     for index, (tele_id, wallet) in enumerate(accounts):
         user_agent = get_random_user_agent()
         headers = {
             "Accept": "application/json",
-            "Accept-Encoding": "gzip, deflate, br, zstd",
-            "Accept-Language": "en-GB,en;q=0.9,en-US;q=0.8",
-            "Cache-Control": "no-cache",
-            "Content-Length": "0",
+            "Accept-Encoding": "gzip, deflate, br",
+            "Accept-Language": "en-GB,en;q=0.9",
             "Content-Type": "application/json",
-            "Origin": "https://taman.fun",
-            "Pragma": "no-cache",
-            "Priority": "u=1, i",
-            "Referer": "https://taman.fun/",
-            "Sec-Ch-Ua": "\"Not/A)Brand\";v=\"8\", \"Chromium\";v=\"126\", \"Microsoft Edge\";v=\"126\", \"Microsoft Edge WebView2\";v=\"126\"",
-            "Sec-Ch-Ua-Mobile": "?0",
-            "Sec-Ch-Ua-Platform": "\"Windows\"",
-            "Sec-Fetch-Dest": "empty",
-            "Sec-Fetch-Mode": "cors",
-            "Sec-Fetch-Site": "same-site",
             "User-Agent": user_agent,
             "Wallet": wallet
         }
 
         account_name = get_account_name(tele_id)
         print(f"\nMemproses akun {index + 1}/{num_accounts}: TeleID={tele_id}")
-        
-        # Menyelesaikan tugas X jika diminta (hanya pada awal eksekusi)
+
+        # Login ke akun
+        if not login_to_account(headers):
+            print(f"Melanjutkan ke akun berikutnya karena login gagal untuk {tele_id}.")
+            continue
+
         if initial_run and complete_task_x:
             tasks = [
                 {"taskId": 11, "teleId": tele_id},
@@ -103,7 +103,6 @@ def process_accounts(accounts, initial_run=True, invite_option_1="", invite_opti
                     print(f"Gagal menyelesaikan tugas {task['taskId']}.")
                 time.sleep(3)  # Jeda 3 detik antara tugas
 
-            # Mengambil hadiah tugas X
             quest_rewards = [1, 2, 4, 3, 13, 14]
             for quest_id in quest_rewards:
                 success = make_post_request("https://api.taman.fun/return-quest", {"questId": quest_id}, headers)
@@ -113,9 +112,7 @@ def process_accounts(accounts, initial_run=True, invite_option_1="", invite_opti
                     print(f"Gagal mengambil hadiah quest {quest_id}.")
                 time.sleep(3)  # Jeda 3 detik antara pengambilan hadiah
 
-        # Menanyakan atau mengambil hadiah undangan teman sesuai opsi
         if initial_run and not complete_task_x:
-            # Opsi undangan 1 teman
             if invite_option_1 == "1":
                 invite_friend_1 = input(f"Apakah akun {account_name} sudah mengundang 1 teman? (y/n): ").strip().lower() == 'y'
                 if invite_friend_1:
@@ -133,7 +130,6 @@ def process_accounts(accounts, initial_run=True, invite_option_1="", invite_opti
             elif invite_option_1 == "3":
                 print(f"Melewati pengambilan hadiah undangan teman untuk akun {account_name}.")
 
-            # Opsi undangan 10 teman
             if invite_option_10 == "1":
                 invite_friend_10 = input(f"Apakah akun {account_name} sudah mengundang 10 teman? (y/n): ").strip().lower() == 'y'
                 if invite_friend_10:
@@ -151,27 +147,22 @@ def process_accounts(accounts, initial_run=True, invite_option_1="", invite_opti
             elif invite_option_10 == "3":
                 print(f"Melewati pengambilan hadiah undangan 10 teman untuk akun {account_name}.")
         
-        # Menjalankan tugas claim 1 jam sekali
         success = make_post_request("https://api.taman.fun/mining", {}, headers)
         if success:
             print("Tugas claim 1 jam selesai.")
         else:
             print("Gagal menjalankan tugas claim 1 jam.")
 
-        # Jeda 5 detik sebelum berpindah ke akun berikutnya
         if index < num_accounts - 1:
             print("Menunggu 5 detik sebelum berpindah ke akun berikutnya...")
             time.sleep(5)
 
-    # Hitung mundur 1 jam setelah semua akun diproses
     print("Semua akun telah diproses. Menunggu 1 jam sebelum memulai ulang...")
     countdown_timer(3600)
-
-    # Memulai ulang kode
-    process_accounts(accounts, initial_run=False, invite_option_1=invite_option_1, invite_option_10=invite_option_10)
 
 # Membaca data dari data.txt
 accounts = read_data('data.txt')
 
 # Memulai proses akun
-process_accounts(accounts)
+while True:
+    process_accounts(accounts)
